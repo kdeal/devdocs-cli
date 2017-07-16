@@ -1,15 +1,15 @@
-devdocs-alfred
+devdocs-cli
 ==============
 
-.. image:: https://img.shields.io/pypi/v/devdocs-alfred.svg
-    :target: https://pypi.python.org/pypi/devdocs-alfred
+.. image:: https://img.shields.io/pypi/v/devdocs-cli.svg
+    :target: https://pypi.python.org/pypi/devdocs-cli
     :alt: Latest PyPI version
 
-.. image:: https://travis-ci.org/kdeal/devdocs-alfred.png
-   :target: https://travis-ci.org/kdeal/devdocs-alfred
+.. image:: https://travis-ci.org/kdeal/devdocs-cli.png
+   :target: https://travis-ci.org/kdeal/devdocs-cli
    :alt: Latest Travis CI build status
 
-Devdocs integration for alfred
+CLI for searching and viewing devdocs.io
 
 Usage
 -----
@@ -29,4 +29,4 @@ Licence
 Authors
 -------
 
-`devdocs-alfred` was written by `Kyle Deal <kdeal@kyledeal.com>`_.
+`devdocs-cli` was written by `Kyle Deal <kdeal@kyledeal.com>`_.
