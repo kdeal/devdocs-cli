@@ -1,0 +1,5 @@
+autopep8
+flake8
+isort
+pre-commit
+pylint
