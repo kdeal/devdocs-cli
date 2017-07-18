@@ -13,7 +13,7 @@ setuptools.setup(
     description='Devdocs integration for alfred',
     long_description=open('README.rst').read(),
 
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages('.', exclude=('tests*',)),
 
     install_requires=['requests'],
     entry_points={
