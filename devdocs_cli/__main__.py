@@ -1,4 +1,5 @@
 import json
+import os
 import re
 from argparse import ArgumentParser
 from os import path
@@ -38,12 +39,12 @@ def get_index(doc_set, url):
 def get_db(doc_set, url):
     return make_request(path.join('docs', doc_set, 'db.json'), url, transform=True)
 
-def view_in_elinks(string, tag=''):
+def view_in_elinks(string, tag='', browser='elinks'):
     if tag:
         tag = '#' + tag
     with NamedTemporaryFile(suffix='.html') as tempfile:
         tempfile.write(string.encode('utf-8'))
-        run(('elinks', tempfile.name + tag))
+        run((browser, tempfile.name + tag))
 
 
 def priority(query, string):
@@ -86,7 +87,7 @@ def view_handler(args):
         tag = ''
         if '#' in path:
             path, tag = path.split('#', maxsplit=1)
-        view_in_elinks(db[path], tag)
+        view_in_elinks(db[path], tag, args.browser)
 
 
 def create_parser():
@@ -100,6 +101,10 @@ def create_parser():
     search.set_defaults(func=search_handler)
 
     view = subparsers.add_parser('view', help='view through one doc set')
+    view.add_argument(
+        '-b', '--browser', help='Browser to view docs in',
+        default=os.environ.get('BROWSER', 'elinks'),
+    )
     view.add_argument('doc_set', help='Document set to view')
     view.add_argument('query', nargs='*', help='Query to view')
     view.set_defaults(func=view_handler)
