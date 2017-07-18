@@ -1,3 +1,4 @@
+import json
 import os
 from argparse import ArgumentParser
 from os import path
@@ -9,8 +10,32 @@ import requests
 
 DEFAULT_URL = 'https://devdocs.io'
 DOCS_URL = 'https://docs.devdocs.io'
+CACHE_DIR = path.expanduser('~/.cache/devdocs')
 
 
+def cache_request(func):
+    def strip_url(url):
+        for pattern in ('http://', 'https://'):
+            url = url.replace(pattern, '')
+        return url
+
+    def decorator(endpoint, url, *args, **kwargs):
+        filename = path.join(CACHE_DIR, strip_url(url), endpoint.replace('docs/', ''))
+        if path.exists(filename):
+            with open(filename) as cache_file:
+                return json.load(cache_file)
+
+        resp = func(endpoint, url, *args, **kwargs)
+
+        os.makedirs(path.dirname(filename), exist_ok=True)
+        with open(filename, 'w') as cache_file:
+            cache_file.write(json.dumps(resp))
+        return resp
+
+    return decorator
+
+
+@cache_request
 def make_request(endpoint, url, transform=False):
     # Should handle this in a better way
     # local devdocs allows docs/<slug>/db.json, but devdocs.io
