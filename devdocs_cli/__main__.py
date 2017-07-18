@@ -1,17 +1,14 @@
-import json
 import os
-import re
 from argparse import ArgumentParser
 from os import path
 from subprocess import run
 from tempfile import NamedTemporaryFile
 
-from bs4 import BeautifulSoup
 import requests
 
 
-DEFAULT_URL='https://devdocs.io'
-DOCS_URL='https://docs.devdocs.io'
+DEFAULT_URL = 'https://devdocs.io'
+DOCS_URL = 'https://docs.devdocs.io'
 
 
 def make_request(endpoint, url, transform=False):
@@ -38,6 +35,7 @@ def get_index(doc_set, url):
 
 def get_db(doc_set, url):
     return make_request(path.join('docs', doc_set, 'db.json'), url, transform=True)
+
 
 def view_in_elinks(string, tag='', browser='elinks'):
     if tag:
@@ -66,6 +64,7 @@ def search_dicts(docs, query, key):
     matched_docs.sort(key=lambda doc: (doc['priority'] * -1, doc[key]))
     return matched_docs
 
+
 def docsets_handler(args):
     docsets = get_docs(args.url)
     for doc in search_dicts(docsets, ' '.join(args.filter), 'slug'):
@@ -74,13 +73,16 @@ def docsets_handler(args):
 
 def search_handler(args):
     docset_index = get_index(args.doc_set, args.url)
-    matched_docs = search_dicts(docset_index['entries'], ' '.join(args.query), 'name')
+    matched_docs = search_dicts(
+        docset_index['entries'], ' '.join(args.query), 'name')
     for doc in matched_docs:
         print(doc['name'])
 
+
 def view_handler(args):
     docset_index = get_index(args.doc_set, args.url)
-    matched_docs = search_dicts(docset_index['entries'], ' '.join(args.query), 'name')
+    matched_docs = search_dicts(
+        docset_index['entries'], ' '.join(args.query), 'name')
     if len(matched_docs) > 0:
         path = matched_docs[0]['path']
         db = get_db(args.doc_set, args.url)
@@ -92,7 +94,8 @@ def view_handler(args):
 
 def create_parser():
     parser = ArgumentParser(description='Query devdocs.io')
-    parser.add_argument('-u', '--url', help='base url of devdocs', default=DEFAULT_URL)
+    parser.add_argument(
+        '-u', '--url', help='base url of devdocs', default=DEFAULT_URL)
     subparsers = parser.add_subparsers()
 
     search = subparsers.add_parser('search', help='search through one doc set')
@@ -109,7 +112,8 @@ def create_parser():
     view.add_argument('query', nargs='*', help='Query to view')
     view.set_defaults(func=view_handler)
 
-    docsets = subparsers.add_parser('docsets', help='search through one doc set')
+    docsets = subparsers.add_parser(
+        'docsets', help='search through one doc set')
     docsets.add_argument('filter', nargs='*', help='filter docsets')
     docsets.set_defaults(func=docsets_handler)
 

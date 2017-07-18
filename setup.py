@@ -1,15 +1,16 @@
 import setuptools
+
 import devdocs_cli
 
 setuptools.setup(
-    name="devdocs-cli",
+    name='devdocs-cli',
     version=devdocs_cli.__version__,
-    url="https://github.com/kdeal/devdocs-cli",
+    url='https://github.com/kdeal/devdocs-cli',
 
-    author="Kyle Deal",
-    author_email="kdeal@kyledeal.com",
+    author='Kyle Deal',
+    author_email='kdeal@kyledeal.com',
 
-    description="Devdocs integration for alfred",
+    description='Devdocs integration for alfred',
     long_description=open('README.rst').read(),
 
     packages=setuptools.find_packages(),

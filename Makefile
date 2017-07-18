@@ -14,4 +14,4 @@ clean:
 .PHONY: test
 test: venv
 	pre-commit run --all-files
-	echo 'This should run tests too
+	pytest tests
