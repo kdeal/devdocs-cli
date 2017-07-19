@@ -14,19 +14,19 @@ CLI for searching and viewing devdocs.io
 Usage
 -----
 
-Installation
+Install
 ------------
 
-Requirements
-^^^^^^^^^^^^
+Install via pip
+^^^^^^^^^^^^^^^
 
-Compatibility
--------------
+::
 
-Licence
--------
+    pip install devdocs-cli
 
-Authors
--------
+Install via source
+^^^^^^^^^^^^^^^^^^
 
-`devdocs-cli` was written by `Kyle Deal <kdeal@kyledeal.com>`_.
+extract the tarball and run::
+
+    python setup.py install
