@@ -50,9 +50,9 @@ def make_request(endpoint, url, transform=False):
         endpoint = endpoint[5:]
     try:
         return requests.get(path.join(url, endpoint), json=None).json()
-    except Exception as e:
+    except Exception as error:
         print(path.join(url, endpoint))
-        raise e
+        raise error
 
 
 def get_docs(url):
@@ -113,13 +113,13 @@ def view_handler(args):
     docset_index = get_index(args.doc_set, args.url)
     matched_docs = search_dicts(
         docset_index['entries'], ' '.join(args.query), 'name')
-    if len(matched_docs) > 0:
-        path = matched_docs[0]['path']
-        db = get_db(args.doc_set, args.url)
+    if matched_docs:
+        doc_path = matched_docs[0]['path']
+        html_db = get_db(args.doc_set, args.url)
         tag = ''
-        if '#' in path:
-            path, tag = path.split('#', maxsplit=1)
-        view_in_elinks(db[path], tag, args.browser)
+        if '#' in doc_path:
+            doc_path, tag = doc_path.split('#', maxsplit=1)
+        view_in_elinks(html_db[doc_path], tag, args.browser)
 
 
 def create_parser():
