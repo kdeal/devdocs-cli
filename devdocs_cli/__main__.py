@@ -4,6 +4,7 @@ from argparse import ArgumentParser
 from os import path
 from subprocess import run
 from tempfile import NamedTemporaryFile
+from time import time
 
 import requests
 
@@ -11,6 +12,7 @@ import requests
 DEFAULT_URL = 'https://devdocs.io'
 DOCS_URL = 'https://docs.devdocs.io'
 CACHE_DIR = path.expanduser('~/.cache/devdocs')
+CACHE_TTL = 60 * 60 * 24 * 7  # 1 week in seconds
 
 
 def cache_request(func):
@@ -23,13 +25,16 @@ def cache_request(func):
         filename = path.join(CACHE_DIR, strip_url(url), endpoint.replace('docs/', ''))
         if path.exists(filename):
             with open(filename) as cache_file:
-                return json.load(cache_file)
+                cache = json.load(cache_file)
+
+            if time() - cache['timestamp'] < CACHE_TTL:
+                return cache['resp']
 
         resp = func(endpoint, url, *args, **kwargs)
 
         os.makedirs(path.dirname(filename), exist_ok=True)
         with open(filename, 'w') as cache_file:
-            cache_file.write(json.dumps(resp))
+            cache_file.write(json.dumps({'resp': resp, 'timestamp': time()}))
         return resp
 
     return decorator
