@@ -19,6 +19,7 @@ setuptools.setup(
     entry_points={
         'console_scripts': [
             'devdocs = devdocs_cli.__main__:main',
+            'devdocs-alfred = devdocs_cli.alfred:main',
         ]
     },
     classifiers=[

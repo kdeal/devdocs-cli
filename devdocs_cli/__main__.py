@@ -55,14 +55,14 @@ def make_request(endpoint, url, transform=False):
         raise error
 
 
-def get_index(doc_set, url):
-    return make_request(path.join('docs', doc_set, 'index.json'), url)
+def get_index(docset, url):
+    return make_request(path.join('docs', docset, 'index.json'), url)
 
 
 def priority(query, string):
-    if string.startswith(query):
+    if string.startswith(' '.join(query)):
         return 2
-    elif query in string:
+    elif all(part in string for part in query):
         return 1
     else:
         return 0
@@ -81,22 +81,21 @@ def search_dicts(docs, query, key):
 
 def docsets(docsets_filter, url):
     all_docsets = make_request('docs/docs.json', url)
-    return search_dicts(all_docsets, ' '.join(docsets_filter), 'slug')
+    return search_dicts(all_docsets, docsets_filter, 'slug')
 
 
-def search(doc_set, query, url):
-    docset_index = get_index(doc_set, url)
-    matched_docs = search_dicts(docset_index['entries'], ' '.join(query), 'name')
+def search(docset, query, url):
+    docset_index = get_index(docset, url)
+    matched_docs = search_dicts(docset_index['entries'], query, 'name')
     return matched_docs
 
 
-def view(doc_set, query, url):
-    docset_index = get_index(doc_set, url)
-    matched_docs = search_dicts(
-        docset_index['entries'], ' '.join(query), 'name')
+def view(docset, query, url):
+    docset_index = get_index(docset, url)
+    matched_docs = search_dicts(docset_index['entries'], query, 'name')
     if matched_docs:
         doc_path = matched_docs[0]['path']
-        html_db = make_request(path.join('docs', doc_set, 'db.json'), url, transform=True)
+        html_db = make_request(path.join('docs', docset, 'db.json'), url, transform=True)
         tag = ''
         if '#' in doc_path:
             doc_path, tag = doc_path.split('#', maxsplit=1)
@@ -124,7 +123,7 @@ def create_parser():
     subparsers = parser.add_subparsers()
 
     search_parser = subparsers.add_parser('search', help='search through one doc set')
-    search_parser.add_argument('doc_set', help='Document set to search')
+    search_parser.add_argument('docset', help='Document set to search')
     search_parser.add_argument('query', nargs='*', help='Query to search')
     search_parser.set_defaults(handler=print_handler, func=search, key='name')
 
@@ -133,7 +132,7 @@ def create_parser():
         '-b', '--browser', help='Browser to view docs in',
         default=os.environ.get('BROWSER', 'elinks'),
     )
-    view_parser.add_argument('doc_set', help='Document set to view')
+    view_parser.add_argument('docset', help='Document set to view')
     view_parser.add_argument('query', nargs='*', help='Query to view')
     view_parser.set_defaults(handler=view_handler)
 
