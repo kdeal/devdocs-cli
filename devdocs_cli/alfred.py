@@ -55,6 +55,12 @@ def docsets_handler(docsets_filter, url):
     return {'items': items}
 
 
+def shortcut_handler(docset, shortcut, **extra):
+    del extra
+    import sys
+    print(docset, shortcut, file=sys.stderr)
+
+
 def create_parser():
     parser = ArgumentParser(description='Query devdocs.io')
     parser.add_argument('-u', '--url', help='base url of devdocs', default=devdocs.DEFAULT_URL)
@@ -68,6 +74,11 @@ def create_parser():
     docsets_parser = subparsers.add_parser('docsets', help='search through one doc set')
     docsets_parser.add_argument('docsets_filter', metavar='filter', nargs='*', help='filter docsets')
     docsets_parser.set_defaults(handler=docsets_handler)
+
+    shortcut_parser = subparsers.add_parser('shortcut', help='add a shortcut')
+    shortcut_parser.add_argument('docset', help='Document set to search')
+    shortcut_parser.add_argument('shortcut', help='shortcut query')
+    shortcut_parser.set_defaults(handler=shortcut_handler)
 
     return parser
 
