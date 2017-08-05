@@ -129,22 +129,27 @@ def write_plist(info):
 
 
 def shortcuts_handler(shortcut, **extra):
+    del extra
     info = read_plist()
     script_filters = (
         obj
         for obj in info['objects']
         if obj['type'] == 'alfred.workflow.input.scriptfilter'
     )
-    return {'items': [
-        {
-            'uid': obj['config']['keyword'],
-            'title': obj['config']['keyword'],
-            'arg': obj['config']['keyword'],
-            'autocomplete': obj['config']['keyword'],
-        }
-        for obj in script_filters
-        if 'keyword' in obj['config'] and not obj['config']['keyword'].startswith('docs')
-    ]}
+    items = []
+
+    for obj in script_filters:
+        if 'keyword' not in obj['config']:
+            continue
+        if not obj['config']['keyword'].startswith('docs'):
+            items.append({
+                'uid': obj['config']['keyword'],
+                'title': obj['config']['keyword'],
+                'arg': obj['config']['keyword'],
+                'autocomplete': obj['config']['keyword'],
+            })
+
+    return {'items': devdocs.search_dicts(items, shortcut, 'arg')}
 
 
 def delete_shortcut_handler(shortcut, **extra):
