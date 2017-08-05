@@ -9,7 +9,7 @@ from time import time
 import requests
 
 
-DEFAULT_URL = 'https://devdocs.io'
+DEFAULT_URL = 'http://localhost:9292/'
 DOCS_URL = 'https://docs.devdocs.io'
 CACHE_DIR = path.expanduser('~/.cache/devdocs')
 CACHE_TTL = 60 * 60 * 24 * 7  # 1 week in seconds
