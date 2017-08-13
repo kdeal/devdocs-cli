@@ -6,7 +6,7 @@ from os import path
 from os import remove
 from shutil import copyfile
 
-import devdocs_cli.__main__ as devdocs
+from . import devdocs
 
 MIDDLE_X_POS = 360
 SPACING = 130

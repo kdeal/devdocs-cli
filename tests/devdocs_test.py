@@ -1,4 +1,4 @@
-from devdocs_cli.__main__ import priority
+from devdocs_cli.devdocs import priority
 
 
 def test_priority_no_match():
