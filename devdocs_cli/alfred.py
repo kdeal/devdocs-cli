@@ -1,12 +1,16 @@
 import json
 import plistlib
 from argparse import ArgumentParser
+from argparse import SUPPRESS
 from copy import deepcopy
 from os import path
 from os import remove
 from shutil import copyfile
 
+from . import config
 from . import devdocs
+
+DEFAULT_CONFIG = path.expanduser('~/.config/devdocs/alfred.json')
 
 MIDDLE_X_POS = 360
 SPACING = 130
@@ -82,24 +86,24 @@ def get_icon(slug):
     return icon_path
 
 
-def search_handler(docset, query, url):
+def search_handler(conf, docset, query):
     items = []
-    results = devdocs.search(docset, query, url)
+    results = devdocs.search(docset, query, conf)
     for item in results:
         items.append({
             'uid': path.join(docset, item['path']),
             'title': item['name'],
             'subtitle': item['path'],
-            'arg': path.join(url, docset, item['path']),
+            'arg': path.join(conf.url, docset, item['path']),
             'autocomplete': item['name'],
         })
 
     return {'items': items}
 
 
-def docsets_handler(docsets_filter, url):
+def docsets_handler(conf, docsets_filter):
     items = []
-    results = devdocs.docsets(docsets_filter, url)
+    results = devdocs.docsets(docsets_filter, conf)
     for item in results:
         # By default the version is not in the title
         if 'release' in item:
@@ -190,7 +194,8 @@ def shortcut_handler(docset, shortcut, **extra):
 
 def create_parser():
     parser = ArgumentParser(description='Query devdocs.io')
-    parser.add_argument('-u', '--url', help='base url of devdocs', default=devdocs.DEFAULT_URL)
+    parser.add_argument('-u', '--url', help='base url of devdocs', default=SUPPRESS)
+    parser.add_argument('-c', '--config-file', help='read config from', default=DEFAULT_CONFIG)
     subparsers = parser.add_subparsers()
 
     search_parser = subparsers.add_parser('search', help='search through one doc set')
@@ -220,9 +225,9 @@ def create_parser():
 
 def main():
     args = create_parser().parse_args()
-    handler_args = vars(args)
+    conf, handler_args = config.from_args(**vars(args))
     handler = handler_args.pop('handler')
-    result_dict = handler(**handler_args)
+    result_dict = handler(conf=conf, **handler_args)
     print(json.dumps(result_dict))
 
 

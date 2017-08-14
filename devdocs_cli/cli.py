@@ -1,8 +1,10 @@
 import os
 from argparse import ArgumentParser
+from argparse import SUPPRESS
 from subprocess import run
 from tempfile import NamedTemporaryFile
 
+from . import config
 from . import devdocs
 
 
@@ -23,7 +25,7 @@ def print_handler(key, func, **kwargs):
 
 def create_parser():
     parser = ArgumentParser(description='Query devdocs.io')
-    parser.add_argument('-u', '--url', help='base url of devdocs', default=devdocs.DEFAULT_URL)
+    parser.add_argument('-u', '--url', help='base url of devdocs', default=SUPPRESS)
     subparsers = parser.add_subparsers()
 
     search_parser = subparsers.add_parser('search', help='search through one doc set')
@@ -49,9 +51,9 @@ def create_parser():
 
 def main():
     args = create_parser().parse_args()
-    handler_args = vars(args)
+    conf, handler_args = config.from_args(**vars(args))
     handler = handler_args.pop('handler')
-    handler(**handler_args)
+    handler(conf=conf, **handler_args)
 
 
 if __name__ == '__main__':
