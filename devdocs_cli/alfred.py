@@ -192,6 +192,60 @@ def shortcut_handler(docset, shortcut, **extra):
     return f'{shortcut} to {docset}'
 
 
+def add_config_handler(conf, option, value):
+    if option in conf._fields:
+        conf = conf._replace(**{option: value})
+    conf.save()
+    return f'{option} set to {value}'
+
+
+def remove_config_handler(conf, option):
+    if option in conf._fields:
+        # Revert config value to the default value
+        conf = conf._replace(**{option: getattr(config.DEFAULT_CONFIG, option)})
+    conf.save()
+    return f'{option} deleted'
+
+
+def list_config_handler(conf, query):
+    # The field to set has been selected
+    if len(query) > 1:
+        value = ' '.join(query[1:])
+        return {'items': [
+            {
+                'uid': query[0],
+                'title': query[0],
+                'subtitle': f'Set to "{value}"',
+                'autocomplete': query[0],
+                'arg': f'{query[0]} "{value}"',
+            }
+        ]}
+    else:
+        options = [
+            {
+                'uid': field,
+                'title': field,
+                'subtitle': value,
+                'autocomplete': field,
+            }
+            for field, value in conf.items()
+        ]
+        return {'items': devdocs.search_dicts(options, query, 'uid')}
+
+
+def changed_config_handler(conf):
+    return {'items': [
+        {
+            'uid': field,
+            'title': field,
+            'subtitle': value,
+            'autocomplete': field,
+            'arg': field,
+        }
+        for field, value in conf.modified.items()
+    ]}
+
+
 def create_parser():
     parser = ArgumentParser(description='Query devdocs.io')
     parser.add_argument('-u', '--url', help='base url of devdocs', default=SUPPRESS)
@@ -212,13 +266,32 @@ def create_parser():
     shortcut_parser.add_argument('shortcut', help='shortcut query')
     shortcut_parser.set_defaults(handler=shortcut_handler)
 
-    shortcut_parser = subparsers.add_parser('shortcuts', help='add a shortcut')
-    shortcut_parser.add_argument('shortcut', help='shortcut query', nargs='*')
-    shortcut_parser.set_defaults(handler=shortcuts_handler)
+    shortcuts_parser = subparsers.add_parser('shortcuts', help='list all shortcuts')
+    shortcuts_parser.add_argument('shortcut', help='shortcut query', nargs='*')
+    shortcuts_parser.set_defaults(handler=shortcuts_handler)
 
-    shortcut_parser = subparsers.add_parser('delete-shortcut', help='add a shortcut')
-    shortcut_parser.add_argument('shortcut', help='shortcut to delete')
-    shortcut_parser.set_defaults(handler=delete_shortcut_handler)
+    delete_parser = subparsers.add_parser('delete-shortcut', help='delete a shortcut')
+    delete_parser.add_argument('shortcut', help='shortcut to delete')
+    delete_parser.set_defaults(handler=delete_shortcut_handler)
+
+    config_parser = subparsers.add_parser('config', help='add a shortcut')
+    config_subparsers = config_parser.add_subparsers()
+
+    config_add_parser = config_subparsers.add_parser('set', help='set a config value')
+    config_add_parser.add_argument('option', help='config option to set')
+    config_add_parser.add_argument('value', help='value to set config option to')
+    config_add_parser.set_defaults(handler=add_config_handler)
+
+    config_add_parser = config_subparsers.add_parser('remove', help='remove a config option')
+    config_add_parser.add_argument('option', help='config option to set')
+    config_add_parser.set_defaults(handler=remove_config_handler)
+
+    config_list_parser = config_subparsers.add_parser('list', help='add a shortcut')
+    config_list_parser.add_argument('query', nargs='*', help='query that will change value', default=[])
+    config_list_parser.set_defaults(handler=list_config_handler)
+
+    config_options_parser = config_subparsers.add_parser('changed', help='add a shortcut')
+    config_options_parser.set_defaults(handler=changed_config_handler)
 
     return parser
 
