@@ -18,7 +18,8 @@ setuptools.setup(
     install_requires=['requests'],
     entry_points={
         'console_scripts': [
-            'devdocs = devdocs_cli.__main__:main',
+            'devdocs = devdocs_cli.cli:main',
+            'devdocs-alfred = devdocs_cli.alfred:main',
         ]
     },
     classifiers=[
