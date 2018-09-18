@@ -1,7 +1,9 @@
+from __future__ import print_function
+
 import os
 from argparse import ArgumentParser
 from argparse import SUPPRESS
-from subprocess import run
+from subprocess import check_call
 from tempfile import NamedTemporaryFile
 
 from . import config
@@ -14,7 +16,7 @@ def view_handler(browser, **view_args):
         tag = '#' + tag
     with NamedTemporaryFile(suffix='.html') as tempfile:
         tempfile.write(html.encode('utf-8'))
-        run((browser, tempfile.name + tag))
+        check_call((browser, tempfile.name + tag))
 
 
 def print_handler(key, func, **kwargs):

@@ -1,6 +1,8 @@
+---
 language: python
 dist: trusty
 python:
+  - "2.7"
   - "3.6"
 install: make venv
 script: make test

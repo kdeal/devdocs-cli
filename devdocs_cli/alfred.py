@@ -81,7 +81,7 @@ def get_icon(slug):
     icon_path = build_path(slug)
     # If all versions have the same icon than the icon has no version ending
     if not path.isfile(icon_path):
-        icon_path = build_path(slug.rsplit('~', maxsplit=1)[0])
+        icon_path = build_path(slug.rsplit('~', 1)[0])
 
     return icon_path
 
@@ -124,12 +124,12 @@ def docsets_handler(conf, docsets_filter):
 
 def read_plist():
     with open('./info.plist', 'rb') as info_file:
-        return plistlib.load(info_file)
+        return plistlib.readPlist(info_file)  # pylint: disable=deprecated-method
 
 
 def write_plist(info):
     with open('./info.plist', 'wb') as info_file:
-        plistlib.dump(info, info_file)
+        plistlib.writePlist(info, info_file)  # pylint: disable=deprecated-method
 
 
 def shortcuts_handler(shortcut, **extra):
@@ -189,14 +189,14 @@ def shortcut_handler(docset, shortcut, **extra):
 
     write_plist(info)
 
-    return f'{shortcut} to {docset}'
+    return '{} to {}'.format(shortcut, docset)
 
 
 def add_config_handler(conf, option, value):
     if option in conf._fields:
         conf = conf._replace(**{option: value})
     conf.save()
-    return f'{option} set to {value}'
+    return '{} set to {}'.format(option, value)
 
 
 def remove_config_handler(conf, option):
@@ -204,7 +204,7 @@ def remove_config_handler(conf, option):
         # Revert config value to the default value
         conf = conf._replace(**{option: getattr(config.DEFAULT_CONFIG, option)})
     conf.save()
-    return f'{option} deleted'
+    return '{} deleted'.format(option)
 
 
 def list_config_handler(conf, query):
@@ -214,10 +214,8 @@ def list_config_handler(conf, query):
         return {'items': [
             {
                 'uid': query[0],
-                'title': query[0],
-                'subtitle': f'Set to "{value}"',
-                'autocomplete': query[0],
-                'arg': f'{query[0]} "{value}"',
+                'title': 'Set {} to "{}"'.format(query[0], value),
+                'arg': '{} {}'.format(query[0], value),
             }
         ]}
     else:
@@ -227,6 +225,7 @@ def list_config_handler(conf, query):
                 'title': field,
                 'subtitle': value,
                 'autocomplete': field,
+                'arg': field,
             }
             for field, value in conf.items()
         ]
@@ -280,7 +279,7 @@ def create_parser():
     config_add_parser = config_subparsers.add_parser('set', help='set a config value')
     config_add_parser.add_argument('option', help='config option to set')
     config_add_parser.add_argument('value', help='value to set config option to')
-    config_add_parser.set_defaults(handler=add_config_handler)
+    config_add_parser.set_defaults(handler=add_config_handler, json=False)
 
     config_add_parser = config_subparsers.add_parser('remove', help='remove a config option')
     config_add_parser.add_argument('option', help='config option to set')
@@ -300,8 +299,12 @@ def main():
     args = create_parser().parse_args()
     conf, handler_args = config.from_args(**vars(args))
     handler = handler_args.pop('handler')
+    use_json = handler_args.pop('json', True)
     result_dict = handler(conf=conf, **handler_args)
-    print(json.dumps(result_dict))
+    if use_json:
+        print(json.dumps(result_dict))
+    else:
+        print(result_dict)
 
 
 if __name__ == '__main__':

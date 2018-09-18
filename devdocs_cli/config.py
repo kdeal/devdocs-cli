@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import json
 import os
 import sys
@@ -28,9 +30,11 @@ class Config(namedtuple('DevdocsConfig', (
         }
 
     def save(self):
-        os.makedirs(path.dirname(self.config_file), exist_ok=True)
-        with open(self.config_file, 'w') as file:
-            json.dump(self.modified, file)
+        if not path.exists(path.dirname(self.config_file)):
+            os.makedirs(path.dirname(self.config_file))
+
+        with open(self.config_file, 'w') as conf_file:
+            json.dump(self.modified, conf_file)
 
 
 DEFAULT_CONFIG = Config(
@@ -46,8 +50,8 @@ def load_config_file(config_file):
     if not path.exists(config_file):
         return {}
 
-    with open(config_file, 'r') as file:
-        config_options = json.load(file)
+    with open(config_file, 'r') as conf_file:
+        config_options = json.load(conf_file)
 
     invalid_args = {
         config_option: value
@@ -56,7 +60,13 @@ def load_config_file(config_file):
     }
     if invalid_args:
         invalid_options = ', '.join(invalid_args.keys())
-        print(f'Invalid config options of {invalid_options} in {config_file}', file=sys.stderr)
+        print(
+            'Invalid config options of {} in {}'.format(
+                invalid_options,
+                config_file,
+            ),
+            file=sys.stderr,
+        )
         for key in invalid_args:
             config_options.pop(key)
 
