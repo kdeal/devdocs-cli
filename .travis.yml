@@ -4,5 +4,5 @@ dist: trusty
 python:
   - "2.7"
   - "3.6"
-install: make venv
+install: pip install -r requirements.txt -r requirements-dev.txt
 script: make test

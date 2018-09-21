@@ -12,7 +12,7 @@ clean:
 	find . -name '*.pyc' -delete
 
 .PHONY: test
-test: venv
+test:
 	pre-commit run --all-files
 	pytest tests
 	pylint devdocs_cli tests
