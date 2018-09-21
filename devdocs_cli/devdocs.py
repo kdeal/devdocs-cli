@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import json
 import os
 import sys
@@ -26,7 +28,9 @@ def cache_request(func):
 
         resp = func(endpoint, conf, *args, **kwargs)
 
-        os.makedirs(path.dirname(filename), exist_ok=True)
+        if not path.exists(path.dirname(filename)):
+            os.makedirs(path.dirname(filename))
+
         with open(filename, 'w') as cache_file:
             cache_file.write(json.dumps({'resp': resp, 'timestamp': time()}))
         return resp
@@ -40,10 +44,13 @@ def make_request(endpoint, conf, transform=False):
     # local devdocs allows docs/<slug>/db.json, but devdocs.io
     # requires docs.devdocs.io/<slug>/db.json
     if transform and conf.url == DEFAULT_CONFIG.url and endpoint.startswith('docs/'):
-        conf._replace(url=conf.docs_url)
+        base_url = conf.docs_url
         endpoint = endpoint[5:]
+    else:
+        base_url = conf.url
+
     try:
-        return requests.get(path.join(conf.url, endpoint), json=None).json()
+        return requests.get(path.join(base_url, endpoint), json=None).json()
     except Exception as error:
         print(path.join(conf.url, endpoint), file=sys.stderr)
         raise error
@@ -89,8 +96,10 @@ def view(docset, query, conf):
     matched_docs = search_dicts(docset_index['entries'], query, 'name')
     if matched_docs:
         doc_path = matched_docs[0]['path']
-        html_db = make_request(path.join('docs', docset, 'db.json'), conf.url, transform=True)
+        html_db = make_request(path.join('docs', docset, 'db.json'), conf, transform=True)
         tag = ''
         if '#' in doc_path:
-            doc_path, tag = doc_path.split('#', maxsplit=1)
+            doc_path, tag = doc_path.split('#', 1)
         return html_db[doc_path], tag
+    else:
+        return None, None
