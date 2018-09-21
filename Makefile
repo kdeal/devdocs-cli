@@ -2,8 +2,7 @@ export PATH := venv/bin/:$(PATH)
 all: venv
 
 venv:
-	virtualenv -p python3.6 venv
-	pip install -r requirements-dev.txt -r requirements.txt -e .
+	tox -e venv
 	pre-commit install --install-hooks
 
 .PHONY: clean
@@ -13,6 +12,4 @@ clean:
 
 .PHONY: test
 test:
-	pre-commit run --all-files
-	pytest tests
-	pylint devdocs_cli tests
+	tox
